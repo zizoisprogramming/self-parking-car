@@ -18,7 +18,7 @@ void set_motor_pins() {
     DDRB |= (1 << RIGHT_DIR_PIN_1) | (1 << RIGHT_DIR_PIN_2); // direction for ports PB0: 8, PB4: 12
 }
 
-void set_duty_cycles(uin8_t duty_cycle_A, uin8_t duty_cycle_B) {
+void set_duty_cycles(uint8_t duty_cycle_A, uint8_t duty_cycle_B) {
     OCR0A = (255 * duty_cycle_A) / 100; // duty cycle A
     OCR0B = (255 * duty_cycle_B) / 100; // duty cycle B
 }
@@ -31,34 +31,34 @@ void timer_motor_init() {
 
 void set_motor_direction(uint8_t left_dir, uint8_t right_dir) {
     if (left_dir == 1) {  // Forward
-        PORTD |= (1 << LEFT_DIR_PIN1);   
-        PORTD &= ~(1 << LEFT_DIR_PIN2);  
+        PORTD |= (1 << LEFT_DIR_PIN_1);   
+        PORTD &= ~(1 << LEFT_DIR_PIN_2);  
     } 
     else if (left_dir == 2) {  // Backward
-        PORTD &= ~(1 << LEFT_DIR_PIN1);  
-        PORTD |= (1 << LEFT_DIR_PIN2);   
+        PORTD &= ~(1 << LEFT_DIR_PIN_1);  
+        PORTD |= (1 << LEFT_DIR_PIN_2);   
     } 
     else {  // stop
-        PORTD &= ~((1 << LEFT_DIR_PIN1) | (1 << LEFT_DIR_PIN2));  
+        PORTD &= ~((1 << LEFT_DIR_PIN_1) | (1 << LEFT_DIR_PIN_2));  
     }
 
     if (right_dir == 1) {  // Forward
-        PORTB |= (1 << RIGHT_DIR_PIN1);   
-        PORTB &= ~(1 << RIGHT_DIR_PIN2);  
+        PORTB |= (1 << RIGHT_DIR_PIN_1);   
+        PORTB &= ~(1 << RIGHT_DIR_PIN_2);  
     } 
     else if (right_dir == 2) {  // Backward
-        PORTB &= ~(1 << RIGHT_DIR_PIN1);  
-        PORTB |= (1 << RIGHT_DIR_PIN2);   
+        PORTB &= ~(1 << RIGHT_DIR_PIN_1);  
+        PORTB |= (1 << RIGHT_DIR_PIN_2);   
     } 
     else {  // stop
-        PORTB &= ~((1 << RIGHT_DIR_PIN1) | (1 << RIGHT_DIR_PIN2));  
+        PORTB &= ~((1 << RIGHT_DIR_PIN_1) | (1 << RIGHT_DIR_PIN_2));  
     }
 }
 
 
 void move_forward(uint8_t duty_cycle) {
     set_motor_direction(1, 1);
-    set_duty_cycles(duty_cycle, duty_cycle)
+    set_duty_cycles(duty_cycle, duty_cycle);
 }
 
 
@@ -96,4 +96,5 @@ void main() {
         _delay_ms(1000);
     }
 
+    while (1);
 }
