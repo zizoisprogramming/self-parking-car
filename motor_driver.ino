@@ -77,7 +77,7 @@ void stop() {
     set_duty_cycles(0, 0);
 }
 
-void main() {
+int main() {
     set_motor_pins();
     timer_motor_init();
 
@@ -97,4 +97,5 @@ void main() {
     }
 
     while (1);
+    return 0;
 }
