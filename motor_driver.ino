@@ -8,7 +8,7 @@
 
 #define LEFT_DIR_PIN_1 PD4 // pin 4
 #define LEFT_DIR_PIN_2 PD7 // pin 4
-#define RIGHT_DIR_PIN_1 PB0 // pin 8
+#define RIGHT_DIR_PIN_1 PB5 // pin 8
 #define RIGHT_DIR_PIN_2 PB4 // pin 12
 
 
