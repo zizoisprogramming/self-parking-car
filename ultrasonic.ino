@@ -5,16 +5,22 @@
 #define TRIG1 PD2
 #define ECHO1 PD3
 
-#define TRIG2 PD4
-#define ECHO2 PD5
+#define TRIG2 PC0  // A0
+#define ECHO2 PC1  // A1
 
-#define TRIG3 PB2
-#define ECHO3 PB3
+#define TRIG3 PC2  // A2
+#define ECHO3 PC3  // A3
 
-#define TRIG4 PB0
-#define ECHO4 PB1
+#define TRIG4 PC4  // A4
+#define ECHO4 PC5  // A5
 
-uint16_t d1, d2, d3, d4;
+#define TRIG5 PB2
+#define ECHO5 PB3
+
+#define TRIG6 PB0
+#define ECHO6 PB1
+
+uint16_t d1, d2, d3, d4, d5, d6;
 
 void uart_init(unsigned int ubrr) {
     UBRR0H = (unsigned char)(ubrr >> 8);
@@ -58,18 +64,19 @@ uint16_t measure_echo(volatile uint8_t *pin_reg, uint8_t pin) {
 
 void initialize_ultrasonic()
 {
-   // Set trigger pins as output
-    DDRD |= (1 << TRIG1) | (1 << TRIG2);
-    DDRB |= (1 << TRIG4) | (1 << TRIG3);
+    // Set trigger pins as output
+    DDRD |= (1 << TRIG1);
+    DDRC |= (1 << TRIG2) | (1 << TRIG3) | (1 << TRIG4);  // PC0-PC4 as outputs
+    DDRB |= (1 << TRIG5) | (1 << TRIG6);
 
     // Set echo pins as input
-    DDRD &= ~((1 << ECHO1) | (1 << ECHO2));
-    DDRB &= ~((1 << ECHO4) | (1 << ECHO3));
+    DDRD &= ~(1 << ECHO1);
+    DDRC &= ~((1 << ECHO2) | (1 << ECHO3) | (1 << ECHO4));  // PC1-PC5 as inputs
+    DDRB &= ~((1 << ECHO5) | (1 << ECHO6));
 
     uart_init(103); // Baud 9600 for 16MHz
 }
 
-// Modular function for reading a specific ultrasonic sensor
 uint16_t read_ultrasonic(volatile uint8_t *port, uint8_t trig_pin, volatile uint8_t *pin_reg, uint8_t echo_pin) {
     send_trigger(port, trig_pin);
     uint16_t echo_time = measure_echo(pin_reg, echo_pin);
@@ -92,25 +99,38 @@ int main(void) {
         uart_print(buffer);
 
         // Read from Sensor 2
-        d2 = read_ultrasonic(&PORTD, TRIG2, &PIND, ECHO2);
+        d2 = read_ultrasonic(&PORTC, TRIG2, &PINC, ECHO2);
         uart_print("Sensor 2: ");
         sprintf(buffer, "%u cm\r\n", d2);
         uart_print(buffer);
 
         // Read from Sensor 3
-        d3 = read_ultrasonic(&PORTB, TRIG3, &PINB, ECHO3);
+        d3 = read_ultrasonic(&PORTC, TRIG3, &PINC, ECHO3);
         uart_print("Sensor 3: ");
         sprintf(buffer, "%u cm\r\n", d3);
         uart_print(buffer);
 
         // Read from Sensor 4
-        d4 = read_ultrasonic(&PORTB, TRIG4, &PINB, ECHO4);
+        d4 = read_ultrasonic(&PORTC, TRIG4, &PINC, ECHO4);
         uart_print("Sensor 4: ");
         sprintf(buffer, "%u cm\r\n", d4);
         uart_print(buffer);
 
+        // Read from Sensor 5
+        d5 = read_ultrasonic(&PORTB, TRIG5, &PINB, ECHO5);
+        uart_print("Sensor 5: ");
+        sprintf(buffer, "%u cm\r\n", d5);
+        uart_print(buffer);
+
+        // Read from Sensor 6
+        d6 = read_ultrasonic(&PORTB, TRIG6, &PINB, ECHO6);
+        uart_print("Sensor 6: ");
+        sprintf(buffer, "%u cm\r\n", d6);
+        uart_print(buffer);
+
         // Print all distances
-        sprintf(buffer, "S1: %u cm | S2: %u cm | S3: %u cm | S4: %u cm\r\n", d1, d2, d3, d4);
+        sprintf(buffer, "S1: %u | S2: %u | S3: %u | S4: %u | S5: %u | S6: %u cm\r\n", 
+               d1, d2, d3, d4, d5, d6);
         uart_print(buffer);
 
         _delay_ms(500);  // Delay for a short while before repeating the measurements
