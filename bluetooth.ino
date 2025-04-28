@@ -19,5 +19,8 @@ void wait_for_bluetooth() {
 }
 
 int main() {
+    initialize_bluetooth();
     wait_for_bluetooth();
+    while (1) {
+    }
 }
