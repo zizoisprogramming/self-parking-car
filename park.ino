@@ -37,9 +37,13 @@ uint16_t d1, d2, d3, d4, d5, d6;
 void uart_init(unsigned int ubrr) {
     UBRR0H = (unsigned char)(ubrr >> 8);
     UBRR0L = (unsigned char)ubrr;
-
-    UCSR0B = (1 << TXEN0); // Enable transmitter
+    UCSR0B = (1 << RXEN0) | (1 << TXEN0); // Enable both transmitter and receiver
     UCSR0C = (1 << UCSZ01) | (1 << UCSZ00); // 8-bit data
+}
+
+unsigned char uart_receive(void) {
+    while (!(UCSR0A & (1 << RXC0))); // Wait for data to be received
+    return UDR0; // Return received data
 }
 
 void uart_transmit(unsigned char data) {
@@ -53,13 +57,16 @@ void uart_print(const char *str) {
     }
 }
 
-void initialize_bluetooth() {
-    DDRD &= ~(1 << RX_PIN);
-    DDRD |= (1 << TX_PIN);
-}
-
-void wait_for_bluetooth() {
-    while (!(PIND & (1 << RX_PIN)));
+void wait_for_bluetooth_command() {
+    uart_print("Waiting for Bluetooth command...\r\n");
+    while (1) {
+        unsigned char command = uart_receive();
+        if (command == 'F') {
+            uart_print("Received 'F' command - Starting...\r\n");
+            return;
+        }
+        uart_print("Invalid command. Send 'F' to start.\r\n");
+    }
 }
 
 void send_trigger(volatile uint8_t *port, uint8_t pin) {
@@ -94,8 +101,6 @@ void initialize_ultrasonic()
     DDRD &= ~(1 << ECHO3);
     DDRC &= ~((1 << ECHO4) | (1 << ECHO5) | (1 << ECHO6));  // PC1-PC5 as inputs
     DDRB &= ~((1 << ECHO1) | (1 << ECHO2));
-
-    uart_init(103); 
 }
 
 uint16_t read_ultrasonic(volatile uint8_t *port, uint8_t trig_pin, volatile uint8_t *pin_reg, uint8_t echo_pin) {
@@ -435,8 +440,9 @@ int main(void) {
     // Initialize motors
     set_motor_pins();
     timer_motor_init();
-    initialize_bluetooth();
-    wait_for_bluetooth();
+    uart_init(103);
+    wait_for_bluetooth_command();
+    
     while (1) {
         uart_print("Measuring distances...\r\n");
 
