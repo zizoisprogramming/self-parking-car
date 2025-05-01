@@ -2,6 +2,7 @@
 #include <util/delay.h>
 #include <stdio.h>
 
+// Connect a resistor (e.g., 10kΩ) between PD0 and GND physically on the circuit.
 
 #define MOTOR_A PD5
 #define MOTOR_B PD6 
@@ -10,6 +11,9 @@
 #define LEFT_DIR_PIN_2 PD7 
 #define RIGHT_DIR_PIN_1 PB5 
 #define RIGHT_DIR_PIN_2 PB4 
+
+#define RX_PIN  PD0
+#define TX_PIN  PD1
 
 #define TRIG1 PB0
 #define ECHO1 PB1
@@ -47,6 +51,15 @@ void uart_print(const char *str) {
     while (*str) {
         uart_transmit(*str++);
     }
+}
+
+void initialize_bluetooth() {
+    DDRD &= ~(1 << RX_PIN);
+    DDRD |= (1 << TX_PIN);
+}
+
+void wait_for_bluetooth() {
+    while (!(PIND & (1 << RX_PIN)));
 }
 
 void send_trigger(volatile uint8_t *port, uint8_t pin) {
@@ -419,10 +432,11 @@ int main(void) {
     char buffer[64];
     // Initialize ultrasonic sensors
     initialize_ultrasonic();
-
     // Initialize motors
     set_motor_pins();
     timer_motor_init();
+    initialize_bluetooth();
+    wait_for_bluetooth();
     while (1) {
         uart_print("Measuring distances...\r\n");
 
